@@ -2687,9 +2687,8 @@ class ToolbarWidgetState extends State<ToolbarWidget> {
                                 height: MediaQuery.of(context).size.height / 2,
                                 child: SingleChildScrollView(
                                   child: DataTable(
-
                                     columnSpacing: 5,
-                                    dataRowMinHeight: 75,
+                                    dataRowHeight: 75,
                                     columns: const <DataColumn>[
                                       DataColumn(
                                         label: Text(
