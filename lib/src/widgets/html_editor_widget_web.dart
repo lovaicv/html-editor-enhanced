@@ -71,9 +71,37 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
   void initSummernote() async {
     var headString = '';
     var summernoteCallbacks = '''callbacks: {
-        onKeydown: function(e) {
+        onInit: function(e) {
+            console.log("customcheck onInit: "+e);
+            var editableArea = e.editable[0];
+            editableArea.style.backgroundColor = "#EEEEEE";
+            \$('.note-codable').css({
+              'background-color': '#EEEEEE',
+               'color': 'black'
+            });
+         },
+        // onChangeCodeview: function(isCodeView) {
+        //     console.log("customcheck onChangeCodeview: "+isCodeView);
+        //     if (isCodeView) {
+        //       // Apply the background color when entering code view
+        //       \$('.note-editable').css({
+        //         'background-color': '#EEEEEE',
+        //         'color': 'black'
+        //       });
+        //     } else {
+        //       // Revert to white text color in default view
+        //       \$('.note-editable').css({
+        //         'background-color': '#EEEEEE',
+        //         // 'color': 'white'
+        //       });
+        //     }
+        // },
+        onKeyup: function(e) {
+            console.log("customcheck onKeyup: "+e);
             var chars = \$(".note-editable").text();
             var totalChars = chars.length;
+            console.log("customcheck chars: "+chars);
+            console.log("customcheck length: "+chars.length);
             ${widget.htmlEditorOptions.characterLimit != null ? '''allowedKeys = (
                 e.which === 8 ||  /* BACKSPACE */
                 e.which === 35 || /* END */
@@ -93,6 +121,32 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
                 e.preventDefault();
             }''' : ''}
             window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toDart: characterCount", "totalChars": totalChars}), "*");
+        },
+        onKeydown: function(e) {
+            // console.log("customcheck onKeydown: "+e);
+            // var chars = \$(".note-editable").text();
+            // var totalChars = chars.length;
+            // console.log("customcheck chars: "+chars);
+            // console.log("customcheck length: "+chars.length);
+            // ${widget.htmlEditorOptions.characterLimit != null ? '''allowedKeys = (
+            //     e.which === 8 ||  /* BACKSPACE */
+            //     e.which === 35 || /* END */
+            //     e.which === 36 || /* HOME */
+            //     e.which === 37 || /* LEFT */
+            //     e.which === 38 || /* UP */
+            //     e.which === 39 || /* RIGHT*/
+            //     e.which === 40 || /* DOWN */
+            //     e.which === 46 || /* DEL*/
+            //     e.ctrlKey === true && e.which === 65 || /* CTRL + A */
+            //     e.ctrlKey === true && e.which === 88 || /* CTRL + X */
+            //     e.ctrlKey === true && e.which === 67 || /* CTRL + C */
+            //     e.ctrlKey === true && e.which === 86 || /* CTRL + V */
+            //     e.ctrlKey === true && e.which === 90    /* CTRL + Z */
+            // );
+            // if (!allowedKeys && \$(e.target).text().length >= ${widget.htmlEditorOptions.characterLimit}) {
+            //     e.preventDefault();
+            // }''' : ''}
+            // window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toDart: characterCount", "totalChars": totalChars}), "*");
         },
     ''';
     var maximumFileSize = 10485760;
@@ -513,8 +567,9 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
                 widget.callbacks!.onChangeContent != null) {
               widget.callbacks!.onChangeContent!.call(data['contents']);
             }
-            if (widget.htmlEditorOptions.shouldEnsureVisible) {
-              Scrollable.of(context).position.ensureVisible(
+            if (widget.htmlEditorOptions.shouldEnsureVisible &&
+                Scrollable.of(context) != null) {
+              Scrollable.of(context)!.position.ensureVisible(
                   context.findRenderObject()!,
                   duration: const Duration(milliseconds: 100),
                   curve: Curves.easeIn);
@@ -698,6 +753,7 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
   void addJSListener(Callbacks c) {
     html.window.onMessage.listen((event) {
       var data = json.decode(event.data);
+      print('customcheck onMessage $data');
       if (data['type'] != null &&
           data['type'].contains('toDart:') &&
           data['view'] == createdViewId) {
