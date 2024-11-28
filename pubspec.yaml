@@ -29,7 +29,7 @@ dependencies:
   # pinned to 0.9.1 because of issues with CanvasKit in the latest versions
   pointer_interceptor: ^0.10.1+1
   # plugin to help maintain effective Dart standards
-  lints: ^4.0.0
+  lints: any
   # plugin for @internal annotation
   meta: '>=1.0.0 <2.0.0'
 
