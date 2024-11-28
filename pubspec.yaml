@@ -14,7 +14,7 @@ dependencies:
   # webview plugin
   flutter_inappwebview: ^6.0.0
   # plugin to get webview's visible fraction for keyboard height adjustment
-  visibility_detector: ^0.4.0+2
+  visibility_detector: any
   # plugin to get when the keyboard is hidden via back (Android)
   # or "done" (iOS) to reset the editor's height
   flutter_keyboard_visibility: ^6.0.0
