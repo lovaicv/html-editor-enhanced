@@ -72,7 +72,6 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
     var headString = '';
     var summernoteCallbacks = '''callbacks: {
         onInit: function(e) {
-            console.log("customcheck onInit: "+e);
             var editableArea = e.editable[0];
             editableArea.style.backgroundColor = "#EEEEEE";
             \$('.note-codable').css({
@@ -80,28 +79,12 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
                'color': 'black'
             });
          },
-        // onChangeCodeview: function(isCodeView) {
-        //     console.log("customcheck onChangeCodeview: "+isCodeView);
-        //     if (isCodeView) {
-        //       // Apply the background color when entering code view
-        //       \$('.note-editable').css({
-        //         'background-color': '#EEEEEE',
-        //         'color': 'black'
-        //       });
-        //     } else {
-        //       // Revert to white text color in default view
-        //       \$('.note-editable').css({
-        //         'background-color': '#EEEEEE',
-        //         // 'color': 'white'
-        //       });
-        //     }
-        // },
         onKeyup: function(e) {
-            console.log("customcheck onKeyup: "+e);
             var chars = \$(".note-editable").text();
             var totalChars = chars.length;
-            console.log("customcheck chars: "+chars);
-            console.log("customcheck length: "+chars.length);
+            window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toDart: characterCount", "totalChars": totalChars}), "*");
+        },
+        onKeydown: function(e) {
             ${widget.htmlEditorOptions.characterLimit != null ? '''allowedKeys = (
                 e.which === 8 ||  /* BACKSPACE */
                 e.which === 35 || /* END */
@@ -120,33 +103,6 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
             if (!allowedKeys && \$(e.target).text().length >= ${widget.htmlEditorOptions.characterLimit}) {
                 e.preventDefault();
             }''' : ''}
-            window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toDart: characterCount", "totalChars": totalChars}), "*");
-        },
-        onKeydown: function(e) {
-            // console.log("customcheck onKeydown: "+e);
-            // var chars = \$(".note-editable").text();
-            // var totalChars = chars.length;
-            // console.log("customcheck chars: "+chars);
-            // console.log("customcheck length: "+chars.length);
-            // ${widget.htmlEditorOptions.characterLimit != null ? '''allowedKeys = (
-            //     e.which === 8 ||  /* BACKSPACE */
-            //     e.which === 35 || /* END */
-            //     e.which === 36 || /* HOME */
-            //     e.which === 37 || /* LEFT */
-            //     e.which === 38 || /* UP */
-            //     e.which === 39 || /* RIGHT*/
-            //     e.which === 40 || /* DOWN */
-            //     e.which === 46 || /* DEL*/
-            //     e.ctrlKey === true && e.which === 65 || /* CTRL + A */
-            //     e.ctrlKey === true && e.which === 88 || /* CTRL + X */
-            //     e.ctrlKey === true && e.which === 67 || /* CTRL + C */
-            //     e.ctrlKey === true && e.which === 86 || /* CTRL + V */
-            //     e.ctrlKey === true && e.which === 90    /* CTRL + Z */
-            // );
-            // if (!allowedKeys && \$(e.target).text().length >= ${widget.htmlEditorOptions.characterLimit}) {
-            //     e.preventDefault();
-            // }''' : ''}
-            // window.parent.postMessage(JSON.stringify({"view": "$createdViewId", "type": "toDart: characterCount", "totalChars": totalChars}), "*");
         },
     ''';
     var maximumFileSize = 10485760;
@@ -238,10 +194,10 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
     summernoteCallbacks = summernoteCallbacks + '}';
     var darkCSS = '';
     if ((Theme.of(widget.initBC).brightness == Brightness.dark ||
-            widget.htmlEditorOptions.darkMode == true) &&
+        widget.htmlEditorOptions.darkMode == true) &&
         widget.htmlEditorOptions.darkMode != false) {
       darkCSS =
-          '<link href=\"assets/packages/html_editor_enhanced/assets/summernote-lite-dark.css\" rel=\"stylesheet\">';
+      '<link href=\"assets/packages/html_editor_enhanced/assets/summernote-lite-dark.css\" rel=\"stylesheet\">';
     }
     var jsCallbacks = '';
     if (widget.callbacks != null) {
@@ -378,7 +334,7 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
                 \$('#summernote-2').summernote('lineHeight', data["changed"]);
               }
               if (data["type"].includes("changeTextDirection")) {
-                var s=document.getSelection();			
+                var s=document.getSelection();      
                 if(s==''){
                     document.execCommand("insertHTML", false, "<p dir='"+data['direction']+"'></p>");
                 }else{
@@ -511,18 +467,18 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
         .replaceFirst('<!--headString-->', headString)
         .replaceFirst('<!--summernoteScripts-->', summernoteScripts)
         .replaceFirst('"jquery.min.js"',
-            '"assets/packages/html_editor_enhanced/assets/jquery.min.js"')
+        '"assets/packages/html_editor_enhanced/assets/jquery.min.js"')
         .replaceFirst('"summernote-lite.min.css"',
-            '"assets/packages/html_editor_enhanced/assets/summernote-lite.min.css"')
+        '"assets/packages/html_editor_enhanced/assets/summernote-lite.min.css"')
         .replaceFirst('"summernote-lite.min.js"',
-            '"assets/packages/html_editor_enhanced/assets/summernote-lite.min.js"');
+        '"assets/packages/html_editor_enhanced/assets/summernote-lite.min.js"');
     if (widget.callbacks != null) addJSListener(widget.callbacks!);
     final iframe = html.IFrameElement()
       ..width = MediaQuery.of(widget.initBC).size.width.toString() //'800'
       ..height = widget.htmlEditorOptions.autoAdjustHeight
           ? actualHeight.toString()
           : widget.otherOptions.height.toString()
-      // ignore: unsafe_html, necessary to load HTML string
+    // ignore: unsafe_html, necessary to load HTML string
       ..srcdoc = htmlString
       ..style.border = 'none'
       ..style.overflow = 'hidden'
@@ -602,12 +558,12 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
       child: Column(
         children: <Widget>[
           widget.htmlToolbarOptions.toolbarPosition ==
-                  ToolbarPosition.aboveEditor
+              ToolbarPosition.aboveEditor
               ? ToolbarWidget(
-                  key: toolbarKey,
-                  controller: widget.controller,
-                  htmlToolbarOptions: widget.htmlToolbarOptions,
-                  callbacks: widget.callbacks)
+              key: toolbarKey,
+              controller: widget.controller,
+              htmlToolbarOptions: widget.htmlToolbarOptions,
+              callbacks: widget.callbacks)
               : Container(height: 0, width: 0),
           Expanded(
               child: Directionality(
@@ -627,12 +583,12 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
                         }
                       }))),
           widget.htmlToolbarOptions.toolbarPosition ==
-                  ToolbarPosition.belowEditor
+              ToolbarPosition.belowEditor
               ? ToolbarWidget(
-                  key: toolbarKey,
-                  controller: widget.controller,
-                  htmlToolbarOptions: widget.htmlToolbarOptions,
-                  callbacks: widget.callbacks)
+              key: toolbarKey,
+              controller: widget.controller,
+              htmlToolbarOptions: widget.htmlToolbarOptions,
+              callbacks: widget.callbacks)
               : Container(height: 0, width: 0),
         ],
       ),
@@ -753,7 +709,6 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
   void addJSListener(Callbacks c) {
     html.window.onMessage.listen((event) {
       var data = json.decode(event.data);
-      print('customcheck onMessage $data');
       if (data['type'] != null &&
           data['type'].contains('toDart:') &&
           data['view'] == createdViewId) {
@@ -805,8 +760,8 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
                 data['error'].contains('base64')
                     ? UploadError.jsException
                     : data['error'].contains('unsupported')
-                        ? UploadError.unsupportedFile
-                        : UploadError.exceededMaxSize);
+                    ? UploadError.unsupportedFile
+                    : UploadError.exceededMaxSize);
           } else {
             var map = <String, dynamic>{
               'lastModified': data['lastModified'],
@@ -823,8 +778,8 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
                 data['error'].contains('base64')
                     ? UploadError.jsException
                     : data['error'].contains('unsupported')
-                        ? UploadError.unsupportedFile
-                        : UploadError.exceededMaxSize);
+                    ? UploadError.unsupportedFile
+                    : UploadError.exceededMaxSize);
           }
         }
         if (data['type'].contains('onKeyDown')) {
